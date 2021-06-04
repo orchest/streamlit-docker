@@ -4,6 +4,7 @@ name: Docker CI
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [manual-trigger]
   release:
