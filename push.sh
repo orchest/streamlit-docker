@@ -1,0 +1,1 @@
+docker push orchest/streamlit:$1

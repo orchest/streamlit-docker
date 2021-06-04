@@ -1,0 +1,42 @@
+# This is a basic workflow to help you get started with Actions
+name: Docker CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  repository_dispatch:
+    types: [manual-trigger]
+  release:
+    types: [published]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  buildpush:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      BUILD_TAG: "latest"
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and push image
+        run: |
+          bash ./build.sh "$BUILD_TAG"
+          bash ./push.sh "$BUILD_TAG"
+
+  push-readme:
+    needs: buildpush
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Push README files to DockerHub nginx-proxy
+        uses: peter-evans/dockerhub-description@v2
+        env:
+          DOCKERHUB_REPOSITORY: orchest/streamlit
+          README_FILEPATH: README.md
+
